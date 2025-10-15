@@ -6,8 +6,6 @@ export const useAlpacaData = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchStockAnalysis = async (
-    apiKey: string,
-    apiSecret: string,
     symbol: string,
     t1: string,
     duration: number
@@ -30,7 +28,7 @@ export const useAlpacaData = () => {
 
       const data = await res.json();
 
-      // ✅ Map server response → StockAnalysis object
+      // Map server response → StockAnalysis object
       const analysis: StockAnalysis = {
         id: `${symbol}-${Date.now()}`,
         symbol,
@@ -47,6 +45,7 @@ export const useAlpacaData = () => {
       };
 
       return analysis;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error('Error fetching stock analysis:', err);
       setError(err.message);
