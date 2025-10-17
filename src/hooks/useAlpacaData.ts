@@ -8,7 +8,8 @@ export const useAlpacaData = () => {
   const fetchStockAnalysis = async (
     symbol: string,
     t1: string,
-    duration: number
+    duration: number,
+    unit: string,
   ): Promise<StockAnalysis | null> => {
     setLoading(true);
     setError(null);
@@ -18,7 +19,7 @@ export const useAlpacaData = () => {
       const res = await fetch('http://localhost:7777/api/fetch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ symbol, t1, duration }),
+        body: JSON.stringify({ symbol, t1, duration, unit }),
       });
 
       if (!res.ok) {

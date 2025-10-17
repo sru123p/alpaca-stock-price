@@ -35,23 +35,23 @@ function toISO(d) {
 
 // fetch trades (ticks) between start and end — handles pagination via next_page_token
 async function fetchAllTrades(symbol, startISO, endISO) {
-  const all = [];
-  let url = `${BASE}/stocks/trades?symbols=${encodeURIComponent(symbol)}&start=${encodeURIComponent(startISO)}&end=${encodeURIComponent(endISO)}&limit=10000`;
-  console.log(url)
-  while (url) {
-    const res = await fetch(url, { headers: headers() });
-    if (!res.ok) throw new Error(`Alpaca trades error ${res.status}: ${await res.text()}`);
-    const j = await res.json();
-    if (!j.trades || !j.trades[symbol]) break;
-    all.push(...j.trades[symbol]);
-    // Alpaca v2 uses next_page_token pattern in some endpoints — check response
-    if (j.next_page_token) {
-      url = `${BASE}/stocks/trades?symbols=${encodeURIComponent(symbol)}&start=${encodeURIComponent(startISO)}&end=${encodeURIComponent(endISO)}&limit=10000&next_page_token=${j.next_page_token}`;
-    } else {
-      url = null;
-    }
-  }
-  return all;
+    const all = [];
+    let nextPageToken = null;
+    do {
+        let url = `${BASE}/stocks/trades?symbols=${encodeURIComponent(symbol)}&start=${encodeURIComponent(startISO)}&end=${encodeURIComponent(endISO)}&limit=10000`;
+        if (nextPageToken) url += `&page_token=${encodeURIComponent(nextPageToken)}`;
+
+        const res = await fetch(url, { headers: headers() });
+        if (!res.ok) throw new Error(`Alpaca trades error ${res.status}: ${await res.text()}`);
+        const j = await res.json();
+
+        if (!j.trades || !j.trades[symbol]) break;
+        all.push(...j.trades[symbol]);
+
+        // Update nextPageToken
+        nextPageToken = j.next_page_token || null;
+    } while (nextPageToken);
+    return all;
 }
 
 // fetch minute bars between start and end (fallback)
@@ -65,16 +65,19 @@ async function fetchBars(symbol, startISO, endISO) {
 
 app.post('/api/fetch', async (req, res) => {
   try {
-    const { symbol, t1, duration } = req.body;
-    if (!symbol || !t1 || !duration) return res.status(400).json({ error: 'symbol, t1, duration required' });
+    const { symbol, t1, duration, unit } = req.body;
+    if (!symbol || !t1 || !duration || !unit) return res.status(400).json({ error: 'symbol, t1, duration required' });
 
-    // t1 = "2024-10-15T09:11:00Z"
     const startDate = new Date(t1);
     if (isNaN(+startDate)) return res.status(400).json({ error: 't1 not a valid date' });
-    const endDate = new Date(+startDate + duration * 60_000);
+    const durationMs = (unit === "seconds") ? duration * 1000 : duration * 60_000; // seconds -> ms, minutes -> ms
+
+    const endDate = new Date(+startDate + durationMs);
 
     const startISO = toISO(startDate);
     const endISO = toISO(endDate);
+    console.log(startISO)
+    console.log(endISO)
 
     // Try to fetch trades first (tick-level). If that fails or returns empty, fallback to bars.
     let trades = [];
@@ -119,8 +122,8 @@ app.post('/api/fetch', async (req, res) => {
       }
 
       const prices = trades.map(tr => tr.p);
-      result.maxPrice = Math.max(...prices);
-      result.minPrice = Math.min(...prices);
+      result.maxPrice = prices.reduce((a, b) => (a > b ? a : b));
+      result.minPrice = prices.reduce((a, b) => (a < b ? a : b));
 
       if (result.priceAtT1 != null) {
         result.pctIncreaseToMax = ((result.maxPrice - result.priceAtT1) / result.priceAtT1) * 100;
@@ -150,8 +153,8 @@ app.post('/api/fetch', async (req, res) => {
 
       if (lastIdx !== -1) result.priceAtT2 = bars[lastIdx].c;
 
-      result.maxPrice = Math.max(...bars.map(b => b.h));
-      result.minPrice = Math.min(...bars.map(b => b.l));
+      result.maxPrice = bars.reduce((a, b) => (a.h > b.h ? a.h : b.h));
+      result.minPrice = bars.reduce((a, b) => (a.l < b.l ? a.l : b.l));
 
       if (result.priceAtT1 != null) {
         result.pctIncreaseToMax = ((result.maxPrice - result.priceAtT1) / result.priceAtT1) * 100;

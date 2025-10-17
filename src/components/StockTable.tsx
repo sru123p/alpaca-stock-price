@@ -14,7 +14,7 @@ interface StockTableProps {
 }
 
 export const StockTable = ({ stocks }: StockTableProps) => {
-  const formatPrice = (price: number) => `$${price.toFixed(2)}`;
+  const formatPrice = (price: number) => `$${price.toFixed(4)}`;
   const formatPercent = (percent: number) => `${percent.toFixed(2)}%`;
 
   return (
