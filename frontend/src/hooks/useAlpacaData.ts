@@ -16,7 +16,7 @@ export const useAlpacaData = () => {
 
     try {
       // Call your Express backend endpoint
-      const res = await fetch('http://localhost:7777/api/fetch', {
+      const res = await fetch('https://alpaca-stock-price.onrender.com/api/fetch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ symbol, t1, duration, unit }),
@@ -46,7 +46,7 @@ export const useAlpacaData = () => {
       };
 
       return analysis;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error('Error fetching stock analysis:', err);
       setError(err.message);

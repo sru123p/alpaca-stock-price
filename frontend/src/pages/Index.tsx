@@ -16,13 +16,13 @@ const Index = () => {
     const [datePart, timePart] = t1.split("T");
     const [year, month, day] = datePart.split("-").map(Number);
     const [hour, minute, second] = timePart.split(":").map(Number);
-    
+
     // Create a Date using local time
     const localDate = new Date(year, month - 1, day, hour, minute, second);
-    
+
     // Convert to UTC ISO string
-    const utcISOString = localDate.toISOString();    
-  
+    const utcISOString = localDate.toISOString();
+
     const analysis = await fetchStockAnalysis(symbol, utcISOString, duration, unit);
 
     if (analysis) {
