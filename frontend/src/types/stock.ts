@@ -9,6 +9,7 @@ export interface StockAnalysis {
   minPrice: number;
   percentIncreaseToMax: number;
   percentDecreaseToMin: number;
+  percentChangeT1toT2: number;
   volumeAtT1: number;
   timestamp: string;
 }

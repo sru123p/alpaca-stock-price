@@ -21,7 +21,12 @@ export const StockForm = ({ onSubmit, loading }: StockFormProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!symbol.trim() || !t1 || !duration) {
+    let fixedT1 = t1;
+    if (t1 && t1.length === 16) {
+      fixedT1 = `${t1}:00`; // Add :00 seconds if user didn’t select seconds
+    }
+
+    if (!symbol.trim() || !fixedT1 || !duration) {
       toast({
         title: 'Validation Error',
         description: 'Please fill in all fields',
@@ -40,7 +45,7 @@ export const StockForm = ({ onSubmit, loading }: StockFormProps) => {
       return;
     }
 
-    onSubmit(symbol.toUpperCase(), t1, durationNum, unit);
+    onSubmit(symbol.toUpperCase(), fixedT1, durationNum, unit);
     setSymbol('');
   };
 

@@ -76,8 +76,6 @@ app.post('/api/fetch', async (req, res) => {
 
     const startISO = toISO(startDate);
     const endISO = toISO(endDate);
-    console.log(startISO)
-    console.log(endISO)
 
     // Try to fetch trades first (tick-level). If that fails or returns empty, fallback to bars.
     let trades = [];
@@ -99,6 +97,7 @@ app.post('/api/fetch', async (req, res) => {
       minPrice: null,
       pctIncreaseToMax: null,
       pctDecreaseToMin: null,
+      pctChangeT1ToT2: null,
       volumeAtT1: null,
     };
 
@@ -128,7 +127,14 @@ app.post('/api/fetch', async (req, res) => {
       if (result.priceAtT1 != null) {
         result.pctIncreaseToMax = ((result.maxPrice - result.priceAtT1) / result.priceAtT1) * 100;
         result.pctDecreaseToMin = ((result.minPrice - result.priceAtT1) / result.priceAtT1) * 100; // negative if fall
+      
+        if (result.priceAtT2 != null) {
+          result.pctChangeT1ToT2 = ((result.priceAtT2 - result.priceAtT1) / result.priceAtT1) * 100;
+        } else {
+          result.pctChangeT1ToT2 = null;
+        }
       }
+
     } else {
       // fallback to minute bars
       const bars = await fetchBars(symbol, startISO, endISO);

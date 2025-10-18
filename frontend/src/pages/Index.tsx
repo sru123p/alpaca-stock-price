@@ -5,7 +5,8 @@ import { StockTable } from '@/components/StockTable';
 import { ExportButtons } from '@/components/ExportButtons';
 import { useAlpacaData } from '@/hooks/useAlpacaData';
 import { useToast } from '@/hooks/use-toast';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, LogOut } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const [stocks, setStocks] = useState<StockAnalysis[]>([]);
@@ -15,7 +16,7 @@ const Index = () => {
   const handleAddStock = async (symbol: string, t1: string, duration: number, unit: string) => {
     const [datePart, timePart] = t1.split("T");
     const [year, month, day] = datePart.split("-").map(Number);
-    const [hour, minute, second] = timePart.split(":").map(Number);
+    const [hour, minute, second = 0] = timePart.split(":").map(Number);
 
     // Create a Date using local time
     const localDate = new Date(year, month - 1, day, hour, minute, second);
@@ -40,18 +41,41 @@ const Index = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("authenticated");
+    toast({
+      title: "Logged out",
+      description: "You have been logged out successfully.",
+    });
+    window.location.reload(); // will show the password form again
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto py-8 px-4">
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
+        {/* HEADER */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
             <TrendingUp className="h-8 w-8 text-primary" />
-            <h1 className="text-4xl font-bold text-foreground">Stock Analysis Dashboard</h1>
+            <h1 className="text-4xl font-bold text-foreground">
+              PTL Dashboard
+            </h1>
           </div>
-          <p className="text-muted-foreground">
-            Analyze historical stock data with second-level precision using Alpaca API
-          </p>
+
+          <Button
+            variant="outline"
+            onClick={handleLogout}
+            className="flex items-center gap-2"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </Button>
         </div>
+
+        <p className="text-muted-foreground mt-2 mb-6">
+          Analyze historical stock data with second-level precision using Alpaca
+          API
+        </p>
 
         <div className="space-y-6">
           <StockForm onSubmit={handleAddStock} loading={loading} />

@@ -41,6 +41,7 @@ export const useAlpacaData = () => {
         minPrice: data.minPrice ?? null,
         percentIncreaseToMax: data.pctIncreaseToMax ?? null,
         percentDecreaseToMin: data.pctDecreaseToMin ?? null,
+        percentChangeT1toT2: data.pctChangeT1ToT2 ?? null,
         volumeAtT1: data.volumeAtT1 ?? null,
         timestamp: new Date().toISOString(),
       };

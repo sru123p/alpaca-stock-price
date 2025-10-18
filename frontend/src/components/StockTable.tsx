@@ -34,6 +34,7 @@ export const StockTable = ({ stocks }: StockTableProps) => {
                 <TableHead>Min Price</TableHead>
                 <TableHead>% Rise to Max</TableHead>
                 <TableHead>% Fall to Min</TableHead>
+                <TableHead>% T1 to T2</TableHead>
                 <TableHead>Volume at T1</TableHead>
               </TableRow>
             </TableHeader>
@@ -61,6 +62,15 @@ export const StockTable = ({ stocks }: StockTableProps) => {
                     </TableCell>
                     <TableCell className="text-red-600 dark:text-red-400">
                       {formatPercent(stock.percentDecreaseToMin)}
+                    </TableCell>
+                    <TableCell
+                      className={
+                        stock.percentChangeT1toT2 < 0
+                          ? "text-red-600 dark:text-red-400"
+                          : "text-green-600 dark:text-green-400"
+                      }
+                    >
+                      {formatPercent(stock.percentChangeT1toT2)}
                     </TableCell>
                     <TableCell>{stock.volumeAtT1.toLocaleString()}</TableCell>
                   </TableRow>
