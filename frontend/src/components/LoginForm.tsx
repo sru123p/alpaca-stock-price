@@ -10,7 +10,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (input === "test" ){//import.meta.env.PTL_APP_PASSWORD) {
+    if (input === import.meta.env.PTL_APP_PASSWORD) {
       localStorage.setItem("authenticated", "true");
       onSuccess();
     } else {
