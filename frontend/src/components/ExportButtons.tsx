@@ -15,12 +15,13 @@ export const ExportButtons = ({ stocks }: ExportButtonsProps) => {
       Symbol: stock.symbol,
       'Start Time': stock.t1,
       'Duration (min)': stock.duration,
-      'Price at T1': stock.priceAtT1.toFixed(2),
-      'Price at T2': stock.priceAtT2.toFixed(2),
-      'Max Price': stock.maxPrice.toFixed(2),
-      'Min Price': stock.minPrice.toFixed(2),
+      'Price at T1': stock.priceAtT1.toFixed(4),
+      'Price at T2': stock.priceAtT2.toFixed(4),
+      'Max Price': stock.maxPrice.toFixed(4),
+      'Min Price': stock.minPrice.toFixed(4),
       '% Rise to Max': stock.percentIncreaseToMax.toFixed(2),
       '% Fall to Min': stock.percentDecreaseToMin.toFixed(2),
+      '% T1 to T2': stock.percentChangeT1toT2.toFixed(2),
       'Volume at T1': stock.volumeAtT1,
     }));
 
@@ -39,12 +40,13 @@ export const ExportButtons = ({ stocks }: ExportButtonsProps) => {
 
     const tableData = stocks.map((stock) => [
       stock.symbol,
-      `$${stock.priceAtT1.toFixed(2)}`,
-      `$${stock.priceAtT2.toFixed(2)}`,
-      `$${stock.maxPrice.toFixed(2)}`,
-      `$${stock.minPrice.toFixed(2)}`,
+      `$${stock.priceAtT1.toFixed(4)}`,
+      `$${stock.priceAtT2.toFixed(4)}`,
+      `$${stock.maxPrice.toFixed(4)}`,
+      `$${stock.minPrice.toFixed(4)}`,
       `${stock.percentIncreaseToMax.toFixed(2)}%`,
       `${stock.percentDecreaseToMin.toFixed(2)}%`,
+      `${stock.percentChangeT1toT2.toFixed(2)}%`,
       stock.volumeAtT1.toLocaleString(),
     ]);
 
@@ -58,6 +60,7 @@ export const ExportButtons = ({ stocks }: ExportButtonsProps) => {
           'Min Price',
           '% Rise',
           '% Fall',
+          '% T1 to T2',
           'Volume',
         ],
       ],
@@ -81,6 +84,7 @@ export const ExportButtons = ({ stocks }: ExportButtonsProps) => {
       'Min Price',
       '% Rise to Max',
       '% Fall to Min',
+      '% T1 to T2',
       'Volume at T1',
     ];
 
@@ -88,12 +92,13 @@ export const ExportButtons = ({ stocks }: ExportButtonsProps) => {
       stock.symbol,
       stock.t1,
       stock.duration,
-      stock.priceAtT1.toFixed(2),
-      stock.priceAtT2.toFixed(2),
-      stock.maxPrice.toFixed(2),
-      stock.minPrice.toFixed(2),
+      stock.priceAtT1.toFixed(4),
+      stock.priceAtT2.toFixed(4),
+      stock.maxPrice.toFixed(4),
+      stock.minPrice.toFixed(4),
       stock.percentIncreaseToMax.toFixed(2),
       stock.percentDecreaseToMin.toFixed(2),
+      stock.percentChangeT1toT2.toFixed(2),
       stock.volumeAtT1,
     ]);
 
