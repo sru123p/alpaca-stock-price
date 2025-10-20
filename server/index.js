@@ -9,7 +9,23 @@ const app = express();
 app.use(bodyParser.json());
 
 const cors = require('cors');
-app.use(cors());
+const allowedOrigins = [
+  'https://alpaca-stock-price-frontend.onrender.com',
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  })
+);
+
 
 const ALPACA_KEY = process.env.ALPACA_KEY_ID;
 const ALPACA_SECRET = process.env.ALPACA_SECRET_KEY;
