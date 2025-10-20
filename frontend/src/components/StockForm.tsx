@@ -88,11 +88,20 @@ export const StockForm = ({ onSubmit, loading }: StockFormProps) => {
                   max="59"
                   placeholder="ss"
                   onChange={(e) => {
-                    const date = new Date(t1);
+                    const date = new Date(t1); // parse the current datetime-local string
                     date.setSeconds(Number(e.target.value) || 0);
-                    setT1(date.toISOString().slice(0, 19));
+
+                    // convert back to "YYYY-MM-DDTHH:MM:SS" (local time, datetime-local compatible)
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, "0");
+                    const day = String(date.getDate()).padStart(2, "0");
+                    const hours = String(date.getHours()).padStart(2, "0");
+                    const minutes = String(date.getMinutes()).padStart(2, "0");
+                    const seconds = String(date.getSeconds()).padStart(2, "0");
+
+                    setT1(`${year}-${month}-${day}T${hours}:${minutes}:${seconds}`);
                   }}
-                  className="w-16 block md:hidden"  // 👈 Only show on mobile
+                  className="w-16 block md:hidden"  // TO only show on mobile
                 />
               </div>
             </div>
