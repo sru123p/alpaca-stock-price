@@ -15,7 +15,7 @@ export const StockForm = ({ onSubmit, loading }: StockFormProps) => {
   const [symbol, setSymbol] = useState('');
   const [t1, setT1] = useState('');
   const [duration, setDuration] = useState('');
-  const [unit, setUnit] = useState('minutes');
+  const [unit, setUnit] = useState('min');
   const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -95,8 +95,8 @@ export const StockForm = ({ onSubmit, loading }: StockFormProps) => {
                   disabled={loading}
                   className="border rounded px-2 py-1"
                 >
-                  <option value="minutes">Min</option>
-                  <option value="seconds">Sec</option>
+                  <option value="min">Min</option>
+                  <option value="sec">Sec</option>
                 </Select>
               </div>
             </div>

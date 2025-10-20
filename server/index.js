@@ -35,23 +35,23 @@ function toISO(d) {
 
 // fetch trades (ticks) between start and end — handles pagination via next_page_token
 async function fetchAllTrades(symbol, startISO, endISO) {
-    const all = [];
-    let nextPageToken = null;
-    do {
-        let url = `${BASE}/stocks/trades?symbols=${encodeURIComponent(symbol)}&start=${encodeURIComponent(startISO)}&end=${encodeURIComponent(endISO)}&limit=10000`;
-        if (nextPageToken) url += `&page_token=${encodeURIComponent(nextPageToken)}`;
+  const all = [];
+  let nextPageToken = null;
+  do {
+    let url = `${BASE}/stocks/trades?symbols=${encodeURIComponent(symbol)}&start=${encodeURIComponent(startISO)}&end=${encodeURIComponent(endISO)}&limit=10000`;
+    if (nextPageToken) url += `&page_token=${encodeURIComponent(nextPageToken)}`;
 
-        const res = await fetch(url, { headers: headers() });
-        if (!res.ok) throw new Error(`Alpaca trades error ${res.status}: ${await res.text()}`);
-        const j = await res.json();
+    const res = await fetch(url, { headers: headers() });
+    if (!res.ok) throw new Error(`Alpaca trades error ${res.status}: ${await res.text()}`);
+    const j = await res.json();
 
-        if (!j.trades || !j.trades[symbol]) break;
-        all.push(...j.trades[symbol]);
+    if (!j.trades || !j.trades[symbol]) break;
+    all.push(...j.trades[symbol]);
 
-        // Update nextPageToken
-        nextPageToken = j.next_page_token || null;
-    } while (nextPageToken);
-    return all;
+    // Update nextPageToken
+    nextPageToken = j.next_page_token || null;
+  } while (nextPageToken);
+  return all;
 }
 
 // fetch minute bars between start and end (fallback)
@@ -70,12 +70,21 @@ app.post('/api/fetch', async (req, res) => {
 
     const startDate = new Date(t1);
     if (isNaN(+startDate)) return res.status(400).json({ error: 't1 not a valid date' });
-    const durationMs = (unit === "seconds") ? duration * 1000 : duration * 60_000; // seconds -> ms, minutes -> ms
+    const durationMs = (unit === "sec") ? duration * 1000 : duration * 60_000; // seconds -> ms, minutes -> ms
 
     const endDate = new Date(+startDate + durationMs);
 
     const startISO = toISO(startDate);
     const endISO = toISO(endDate);
+
+    const t1MinuteStart = new Date(startDate);
+    t1MinuteStart.setSeconds(0, 0);
+    const t1MinuteEnd = new Date(+t1MinuteStart + 60_000);
+    const t1MinuteStartISO = toISO(t1MinuteStart);
+    const t1MinuteEndISO = toISO(t1MinuteEnd);
+
+    // Fetch 1-minute bars (include the one before t1)
+    const bars = await fetchBars(symbol, t1MinuteStartISO, t1MinuteEndISO);
 
     // Try to fetch trades first (tick-level). If that fails or returns empty, fallback to bars.
     let trades = [];
@@ -101,20 +110,42 @@ app.post('/api/fetch', async (req, res) => {
       volumeAtT1: null,
     };
 
+    // Get the bar covering t1 (e.g., 8:40:00 → 8:41:00)
+    const t1Bar = bars.find(b => {
+      const bt = new Date(b.t);
+      return bt == t1MinuteStart;
+    });
+
+    if (t1Bar) {
+      result.volumeAtT1 = t1Bar.v;
+    }
+    else {
+      let tradesVol = [];
+      try {
+        tradesVol = await fetchAllTrades(symbol, t1MinuteStartISO, t1MinuteEndISO);
+      } catch (e) {
+        console.warn('trades fetch failed, reporting volume 1st trade:', e.message);
+        tradesVol = [];
+      }
+      if (tradesVol.length) {
+        result.volumeAtT1 = tradesVol.reduce((sum, tr) => sum + (tr.s || 0), 0);
+      }
+    }
+
     if (trades.length) {
       // Each trade typically: { p: price, s: size, t: timestamp }
       // Normalize timestamps and sort just in case
-      trades.sort((a,b) => new Date(a.t) - new Date(b.t));
+      trades.sort((a, b) => new Date(a.t) - new Date(b.t));
       // find price at or after t1
       const idxAtOrAfter = trades.findIndex(tr => new Date(tr.t) >= startDate);
       const idxAtOrBeforeT2 = (() => {
-        for (let i = trades.length -1; i >=0; --i) if (new Date(trades[i].t) <= endDate) return i;
+        for (let i = trades.length - 1; i >= 0; --i) if (new Date(trades[i].t) <= endDate) return i;
         return -1;
       })();
 
       if (idxAtOrAfter !== -1) {
         result.priceAtT1 = trades[idxAtOrAfter].p;
-        result.volumeAtT1 = trades[idxAtOrAfter].s;
+        if (!result.volumeAtT1) result.volumeAtT1 = trades[idxAtOrAfter].s;
       }
       if (idxAtOrBeforeT2 !== -1) {
         result.priceAtT2 = trades[idxAtOrBeforeT2].p;
@@ -127,7 +158,7 @@ app.post('/api/fetch', async (req, res) => {
       if (result.priceAtT1 != null) {
         result.pctIncreaseToMax = ((result.maxPrice - result.priceAtT1) / result.priceAtT1) * 100;
         result.pctDecreaseToMin = ((result.minPrice - result.priceAtT1) / result.priceAtT1) * 100; // negative if fall
-      
+
         if (result.priceAtT2 != null) {
           result.pctChangeT1ToT2 = ((result.priceAtT2 - result.priceAtT1) / result.priceAtT1) * 100;
         } else {
@@ -153,7 +184,7 @@ app.post('/api/fetch', async (req, res) => {
 
       // last bar at or before t2
       const lastIdx = (() => {
-        for (let i = bars.length-1; i>=0; --i) if (new Date(bars[i].t) <= endDate) return i;
+        for (let i = bars.length - 1; i >= 0; --i) if (new Date(bars[i].t) <= endDate) return i;
         return -1;
       })();
 

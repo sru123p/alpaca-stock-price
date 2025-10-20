@@ -1,8 +1,11 @@
 export interface StockAnalysis {
   id: string;
   symbol: string;
+  inputTime: string;
   t1: string;
+  t2: string;
   duration: number;
+  timeUnit: string;
   priceAtT1: number;
   priceAtT2: number;
   maxPrice: number;

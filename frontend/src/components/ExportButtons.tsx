@@ -13,8 +13,8 @@ export const ExportButtons = ({ stocks }: ExportButtonsProps) => {
   const exportToExcel = () => {
     const data = stocks.map((stock) => ({
       Symbol: stock.symbol,
-      'Start Time': stock.t1,
-      'Duration (min)': stock.duration,
+      'T1': stock.inputTime,
+      'Duration': `${stock.duration} ${stock.timeUnit}`,
       'Price at T1': stock.priceAtT1.toFixed(4),
       'Price at T2': stock.priceAtT2.toFixed(4),
       'Max Price': stock.maxPrice.toFixed(4),
@@ -40,6 +40,8 @@ export const ExportButtons = ({ stocks }: ExportButtonsProps) => {
 
     const tableData = stocks.map((stock) => [
       stock.symbol,
+      `${stock.inputTime}`,
+      `${stock.duration} ${stock.timeUnit}`,
       `$${stock.priceAtT1.toFixed(4)}`,
       `$${stock.priceAtT2.toFixed(4)}`,
       `$${stock.maxPrice.toFixed(4)}`,
@@ -54,6 +56,8 @@ export const ExportButtons = ({ stocks }: ExportButtonsProps) => {
       head: [
         [
           'Symbol',
+          'T1',
+          'Duration',
           'Price T1',
           'Price T2',
           'Max Price',
@@ -76,8 +80,8 @@ export const ExportButtons = ({ stocks }: ExportButtonsProps) => {
   const exportToCSV = () => {
     const headers = [
       'Symbol',
-      'Start Time',
-      'Duration (min)',
+      'T1',
+      'Duration',
       'Price at T1',
       'Price at T2',
       'Max Price',
@@ -90,8 +94,8 @@ export const ExportButtons = ({ stocks }: ExportButtonsProps) => {
 
     const rows = stocks.map((stock) => [
       stock.symbol,
-      stock.t1,
-      stock.duration,
+      stock.inputTime,
+      `${stock.duration} ${stock.timeUnit}`,
       stock.priceAtT1.toFixed(4),
       stock.priceAtT2.toFixed(4),
       stock.maxPrice.toFixed(4),

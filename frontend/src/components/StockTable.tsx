@@ -28,6 +28,8 @@ export const StockTable = ({ stocks }: StockTableProps) => {
             <TableHeader>
               <TableRow>
                 <TableHead>Symbol</TableHead>
+                <TableHead>T1</TableHead>
+                <TableHead>Duration</TableHead>
                 <TableHead>Price at T1</TableHead>
                 <TableHead>Price at T2</TableHead>
                 <TableHead>Max Price</TableHead>
@@ -49,6 +51,8 @@ export const StockTable = ({ stocks }: StockTableProps) => {
                 stocks.map((stock) => (
                   <TableRow key={stock.id}>
                     <TableCell className="font-medium">{stock.symbol}</TableCell>
+                    <TableCell>{stock.inputTime}</TableCell>
+                    <TableCell>{stock.duration}{" "}{stock.timeUnit}</TableCell>
                     <TableCell>{formatPrice(stock.priceAtT1)}</TableCell>
                     <TableCell>{formatPrice(stock.priceAtT2)}</TableCell>
                     <TableCell className="text-green-600 dark:text-green-400">

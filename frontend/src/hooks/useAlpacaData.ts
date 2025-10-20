@@ -29,12 +29,27 @@ export const useAlpacaData = () => {
 
       const data = await res.json();
 
+      // Convert UTC time (stock.t1) to local time and remove seconds
+      const formattedT1 = new Date(t1)
+        .toLocaleString('sv-SE', {
+          hour12: false,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: "2-digit"
+        }) // keeps ISO-like look
+
       // Map server response → StockAnalysis object
       const analysis: StockAnalysis = {
         id: `${symbol}-${Date.now()}`,
         symbol,
+        inputTime: formattedT1,
         t1: data.t1,
+        t2: data.t2,
         duration,
+        timeUnit: unit,
         priceAtT1: data.priceAtT1 ?? null,
         priceAtT2: data.priceAtT2 ?? null,
         maxPrice: data.maxPrice ?? null,
