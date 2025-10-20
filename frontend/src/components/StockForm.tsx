@@ -69,14 +69,32 @@ export const StockForm = ({ onSubmit, loading }: StockFormProps) => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="t1">Start Time (T1)</Label>
-              <Input
-                id="t1"
-                type="datetime-local"
-                step="1"
-                value={t1}
-                onChange={(e) => setT1(e.target.value)}
-                disabled={loading}
-              />
+              <div className="flex gap-2">
+                {/* Main datetime input */}
+                <Input
+                  id="t1"
+                  type="datetime-local"
+                  step="1"
+                  value={t1}
+                  onChange={(e) => setT1(e.target.value)}
+                  disabled={loading}
+                  className="flex-1"
+                />
+
+                {/* Seconds input - visible only on mobile */}
+                <Input
+                  type="number"
+                  min="0"
+                  max="59"
+                  placeholder="ss"
+                  onChange={(e) => {
+                    const date = new Date(t1);
+                    date.setSeconds(Number(e.target.value) || 0);
+                    setT1(date.toISOString().slice(0, 19));
+                  }}
+                  className="w-16 block md:hidden"  // 👈 Only show on mobile
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="duration">Duration</Label>
