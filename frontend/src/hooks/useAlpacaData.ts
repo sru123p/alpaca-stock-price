@@ -16,7 +16,7 @@ export const useAlpacaData = () => {
 
     try {
       // Call your Express backend endpoint
-      const res = await fetch('https://alpaca-stock-price.onrender.com/api/fetch', {
+      const res = await fetch('http://localhost:7777/api/fetch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ symbol, t1, duration, unit }),

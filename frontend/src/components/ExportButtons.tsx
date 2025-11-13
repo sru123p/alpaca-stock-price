@@ -1,15 +1,26 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Download, Clock } from 'lucide-react';
 import { StockAnalysis } from '@/types/stock';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { Input } from '@/components/ui/input';
+import { useAlpacaData } from '@/hooks/useAlpacaData';
+import { useToast } from '@/hooks/use-toast';
 
 interface ExportButtonsProps {
   stocks: StockAnalysis[];
+  onUpdateStocks: (updated: StockAnalysis[]) => void;
 }
 
-export const ExportButtons = ({ stocks }: ExportButtonsProps) => {
+export const ExportButtons = ({ stocks, onUpdateStocks }: ExportButtonsProps) => {
+  const { fetchStockAnalysis } = useAlpacaData();
+  const { toast } = useToast();
+  const [newDuration, setNewDuration] = useState('');
+  const [newUnit, setNewUnit] = useState<'min' | 'sec'>('min');
+  const [loading, setLoading] = useState(false);
+
   const exportToExcel = () => {
     const data = stocks.map((stock) => ({
       Symbol: stock.symbol,
@@ -117,6 +128,35 @@ export const ExportButtons = ({ stocks }: ExportButtonsProps) => {
     window.URL.revokeObjectURL(url);
   };
 
+  // =====================
+  //  APPLY NEW DURATION
+  // =====================
+  const handleApplyDuration = async () => {
+    if (!stocks.length) return;
+    setLoading(true);
+    try {
+      const updatedStocks: StockAnalysis[] = [];
+      for (const stock of stocks) {
+        const updated = await fetchStockAnalysis(stock.symbol, stock.t1, parseInt(newDuration), stock.timeUnit);
+        if (updated) updatedStocks.push(updated);
+      }
+      onUpdateStocks(updatedStocks);
+      toast({
+        title: 'Success',
+        description: `All rows updated with ${newDuration} ${stocks[0]?.timeUnit}`,
+      });
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: 'Error',
+        description: 'Failed to update duration',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex gap-2 flex-wrap">
       <Button onClick={exportToExcel} disabled={stocks.length === 0} variant="outline">
@@ -131,6 +171,27 @@ export const ExportButtons = ({ stocks }: ExportButtonsProps) => {
         <Download className="mr-2 h-4 w-4" />
         Export to CSV
       </Button>
+      {/* Divider */}
+      <div className="w-px h-6 bg-border mx-2" />
+
+      {/* Dynamic duration input */}
+      <div className="flex items-center gap-2">
+        <Clock className="w-4 h-4 text-muted-foreground" />
+        <Input
+          type="number"
+          min={1}
+          value={newDuration}
+          onChange={(e) => setNewDuration(e.target.value)}
+          className="w-24"
+          placeholder="min"
+        />
+        <Button
+          onClick={handleApplyDuration}
+          disabled={loading || !stocks.length}
+        >
+          {loading ? 'Applying...' : 'Apply'}
+        </Button>
+      </div>
     </div>
   );
 };

@@ -41,6 +41,15 @@ const Index = () => {
     }
   };
 
+  // Delete a specific stock row
+  const handleDeleteStock = (id: string) => {
+    setStocks((prev) => prev.filter((s) => s.id !== id));
+    toast({
+      title: 'Deleted',
+      description: 'Stock analysis removed.',
+    });
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("authenticated");
     toast({
@@ -79,8 +88,8 @@ const Index = () => {
 
         <div className="space-y-6">
           <StockForm onSubmit={handleAddStock} loading={loading} />
-          <ExportButtons stocks={stocks} />
-          <StockTable stocks={stocks} />
+          <ExportButtons stocks={stocks} onUpdateStocks={setStocks} />
+          <StockTable stocks={stocks} onDelete={handleDeleteStock}/>
         </div>
       </div>
     </div>

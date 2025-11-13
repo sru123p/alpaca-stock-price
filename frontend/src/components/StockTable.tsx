@@ -7,15 +7,25 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface StockTableProps {
   stocks: StockAnalysis[];
+  onDelete: (id: string) => void;
 }
 
-export const StockTable = ({ stocks }: StockTableProps) => {
+export const StockTable = ({ stocks, onDelete }: StockTableProps) => {
   const formatPrice = (price: number) => `$${price.toFixed(4)}`;
   const formatPercent = (percent: number) => `${percent.toFixed(2)}%`;
+
+  // Simple logic to decide which occurred first (you can adjust this logic if backend provides timestamps)
+  const whichOccurredFirst = (rise: number, fall: number): string => {
+    if (rise > Math.abs(fall)) return "Max First";
+    if (rise < Math.abs(fall)) return "Min First";
+    return "Equal Movement";
+  };
 
   return (
     <Card>
@@ -27,6 +37,7 @@ export const StockTable = ({ stocks }: StockTableProps) => {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>#</TableHead>
                 <TableHead>Symbol</TableHead>
                 <TableHead>T1</TableHead>
                 <TableHead>Duration</TableHead>
@@ -36,6 +47,7 @@ export const StockTable = ({ stocks }: StockTableProps) => {
                 <TableHead>Min Price</TableHead>
                 <TableHead>% Rise to Max</TableHead>
                 <TableHead>% Fall to Min</TableHead>
+                <TableHead>Occurred First</TableHead>
                 <TableHead>% T1 to T2</TableHead>
                 <TableHead>Volume at T1</TableHead>
               </TableRow>
@@ -48,8 +60,9 @@ export const StockTable = ({ stocks }: StockTableProps) => {
                   </TableCell>
                 </TableRow>
               ) : (
-                stocks.map((stock) => (
-                  <TableRow key={stock.id}>
+                stocks.map((stock, index) => (
+                  <TableRow key={stock.id} className="group hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                    <TableCell  className="text-center">{index + 1}.</TableCell>
                     <TableCell className="font-medium">{stock.symbol}</TableCell>
                     <TableCell>{stock.inputTime}</TableCell>
                     <TableCell>{stock.duration}{" "}{stock.timeUnit}</TableCell>
@@ -67,6 +80,9 @@ export const StockTable = ({ stocks }: StockTableProps) => {
                     <TableCell className="text-red-600 dark:text-red-400">
                       {formatPercent(stock.percentDecreaseToMin)}
                     </TableCell>
+                    <TableCell>
+                      {whichOccurredFirst(stock.percentIncreaseToMax, stock.percentDecreaseToMin)}
+                    </TableCell>
                     <TableCell
                       className={
                         stock.percentChangeT1toT2 < 0
@@ -77,6 +93,15 @@ export const StockTable = ({ stocks }: StockTableProps) => {
                       {formatPercent(stock.percentChangeT1toT2)}
                     </TableCell>
                     <TableCell>{stock.volumeAtT1.toLocaleString()}</TableCell>
+                    <TableCell className="text-center">
+                      <button
+                      onClick={() => onDelete(stock.id)}
+                      className="hidden group-hover:inline-flex p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                      title="Delete row"
+                      >
+                      <X className="w-4 h-4 text-red-600 hover:text-red-700" />
+                      </button>
+                    </TableCell>
                   </TableRow>
                 ))
               )}
