@@ -20,13 +20,6 @@ export const StockTable = ({ stocks, onDelete }: StockTableProps) => {
   const formatPrice = (price: number) => `$${price.toFixed(4)}`;
   const formatPercent = (percent: number) => `${percent.toFixed(2)}%`;
 
-  // Simple logic to decide which occurred first (you can adjust this logic if backend provides timestamps)
-  const whichOccurredFirst = (rise: number, fall: number): string => {
-    if (rise > Math.abs(fall)) return "Max First";
-    if (rise < Math.abs(fall)) return "Min First";
-    return "Equal Movement";
-  };
-
   return (
     <Card>
       <CardHeader>
@@ -81,7 +74,7 @@ export const StockTable = ({ stocks, onDelete }: StockTableProps) => {
                       {formatPercent(stock.percentDecreaseToMin)}
                     </TableCell>
                     <TableCell>
-                      {whichOccurredFirst(stock.percentIncreaseToMax, stock.percentDecreaseToMin)}
+                      {stock.firstEvent}
                     </TableCell>
                     <TableCell
                       className={

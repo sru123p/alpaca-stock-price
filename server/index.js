@@ -124,6 +124,7 @@ app.post('/api/fetch', async (req, res) => {
       pctDecreaseToMin: null,
       pctChangeT1ToT2: null,
       volumeAtT1: null,
+      firstEvent: null,
     };
 
     // Get the bar covering t1 (e.g., 8:40:00 → 8:41:00)
@@ -171,6 +172,18 @@ app.post('/api/fetch', async (req, res) => {
       result.maxPrice = prices.reduce((a, b) => (a > b ? a : b));
       result.minPrice = prices.reduce((a, b) => (a < b ? a : b));
 
+      // --- NEW: Compute firstEvent ---
+      const maxPrice = result.maxPrice;
+      const minPrice = result.minPrice;
+
+      const timeOfMax = trades.find(tr => tr.p === maxPrice)?.t || null;
+      const timeOfMin = trades.find(tr => tr.p === minPrice)?.t || null;
+
+      if (timeOfMax && timeOfMin) {
+        result.firstEvent =
+          new Date(timeOfMax) < new Date(timeOfMin) ? "rise" : "fall";
+      }
+
       if (result.priceAtT1 != null) {
         result.pctIncreaseToMax = ((result.maxPrice - result.priceAtT1) / result.priceAtT1) * 100;
         result.pctDecreaseToMin = ((result.minPrice - result.priceAtT1) / result.priceAtT1) * 100; // negative if fall
@@ -208,6 +221,18 @@ app.post('/api/fetch', async (req, res) => {
 
       result.maxPrice = bars.reduce((a, b) => (a.h > b.h ? a.h : b.h));
       result.minPrice = bars.reduce((a, b) => (a.l < b.l ? a.l : b.l));
+
+        // --- NEW: Compute firstEvent ---
+        const maxPrice = result.maxPrice;
+        const minPrice = result.minPrice;
+
+        const timeOfMax = bars.find(b => b.h === maxPrice)?.t || null;
+        const timeOfMin = bars.find(b => b.l === minPrice)?.t || null;
+
+        if (timeOfMax && timeOfMin) {
+          result.firstEvent =
+            new Date(timeOfMax) < new Date(timeOfMin) ? "rise" : "fall";
+        }
 
       if (result.priceAtT1 != null) {
         result.pctIncreaseToMax = ((result.maxPrice - result.priceAtT1) / result.priceAtT1) * 100;

@@ -59,6 +59,7 @@ export const useAlpacaData = () => {
         percentChangeT1toT2: data.pctChangeT1ToT2 ?? null,
         volumeAtT1: data.volumeAtT1 ?? null,
         timestamp: new Date().toISOString(),
+        firstEvent: data.firstEvent,
       };
 
       return analysis;

@@ -15,6 +15,7 @@ export interface StockAnalysis {
   percentChangeT1toT2: number;
   volumeAtT1: number;
   timestamp: string;
+  firstEvent: string;
 }
 
 export interface AlpacaBar {
