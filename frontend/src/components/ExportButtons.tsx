@@ -8,6 +8,7 @@ import autoTable from 'jspdf-autotable';
 import { Input } from '@/components/ui/input';
 import { useAlpacaData } from '@/hooks/useAlpacaData';
 import { useToast } from '@/hooks/use-toast';
+import { Select } from '@/components/ui/select'
 
 interface ExportButtonsProps {
   stocks: StockAnalysis[];
@@ -18,7 +19,7 @@ export const ExportButtons = ({ stocks, onUpdateStocks }: ExportButtonsProps) =>
   const { fetchStockAnalysis } = useAlpacaData();
   const { toast } = useToast();
   const [newDuration, setNewDuration] = useState('');
-  const [newUnit, setNewUnit] = useState<'min' | 'sec'>('min');
+  const [newUnit, setNewUnit] = useState('min');
   const [loading, setLoading] = useState(false);
 
   const exportToExcel = () => {
@@ -137,7 +138,7 @@ export const ExportButtons = ({ stocks, onUpdateStocks }: ExportButtonsProps) =>
     try {
       const updatedStocks: StockAnalysis[] = [];
       for (const stock of stocks) {
-        const updated = await fetchStockAnalysis(stock.symbol, stock.t1, parseInt(newDuration), stock.timeUnit);
+        const updated = await fetchStockAnalysis(stock.symbol, stock.t1, parseInt(newDuration), newUnit);
         if (updated) updatedStocks.push(updated);
       }
       onUpdateStocks(updatedStocks);
@@ -183,8 +184,18 @@ export const ExportButtons = ({ stocks, onUpdateStocks }: ExportButtonsProps) =>
           value={newDuration}
           onChange={(e) => setNewDuration(e.target.value)}
           className="w-24"
-          placeholder="min"
+          placeholder="5"
         />
+        <Select
+          value={newUnit}
+          onChange={(e) => setNewUnit(e.target.value)}
+          disabled={loading}
+          className="border rounded px-2 py-1"
+        >
+          <option value="min">Min</option>
+          <option value="sec">Sec</option>
+        </Select>
+
         <Button
           onClick={handleApplyDuration}
           disabled={loading || !stocks.length}
