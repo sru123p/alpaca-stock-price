@@ -26,7 +26,7 @@ export const StockTable = ({ stocks, onDelete }: StockTableProps) => {
         <CardTitle>Stock Analysis Results</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="rounded-md border">
+        <div className="rounded-md border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -43,6 +43,8 @@ export const StockTable = ({ stocks, onDelete }: StockTableProps) => {
                 <TableHead>Occurred First</TableHead>
                 <TableHead>% T1 to T2</TableHead>
                 <TableHead>Volume at T1</TableHead>
+                <TableHead>Ask at T1</TableHead>
+                <TableHead>Bid at T2</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -86,6 +88,8 @@ export const StockTable = ({ stocks, onDelete }: StockTableProps) => {
                       {formatPercent(stock.percentChangeT1toT2)}
                     </TableCell>
                     <TableCell>{stock.volumeAtT1.toLocaleString()}</TableCell>
+                    <TableCell>{formatPrice(stock.askAtT1)}</TableCell>
+                    <TableCell>{formatPrice(stock.bidAtT2)}</TableCell>
                     <TableCell className="text-center">
                       <button
                       onClick={() => onDelete(stock.id)}

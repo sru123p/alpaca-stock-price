@@ -70,6 +70,38 @@ async function fetchAllTrades(symbol, startISO, endISO) {
   return all;
 }
 
+// ------- NEW: QUOTE FETCHER -------
+async function fetchAllQuotes(symbol, startISO, endISO) {
+  const quotes = [];
+  let nextPageToken = null;
+  do {
+    let url = `${BASE}/stocks/quotes?symbols=${encodeURIComponent(symbol)}&start=${encodeURIComponent(startISO)}&end=${encodeURIComponent(endISO)}&limit=10000`;
+    if (nextPageToken) url += `&page_token=${encodeURIComponent(nextPageToken)}`;
+
+    const res = await fetch(url, { headers: headers() });
+    if (!res.ok) throw new Error(`Alpaca quotes error ${res.status}: ${await res.text()}`);
+
+    const j = await res.json();
+    if (!j.quotes || !j.quotes[symbol]) break;
+    quotes.push(...j.quotes[symbol]);
+
+    nextPageToken = j.next_page_token || null;
+  } while (nextPageToken);
+
+  return quotes;
+}
+
+// ------- OPTIONAL: Human Readable Decoder -------
+function decodeQuote(q) {
+  return {
+    ask: `${q.ap} (${q.as} shares on ${q.ax})`,
+    bid: `${q.bp} (${q.bs} shares on ${q.bx})`,
+    tape: q.z,
+    conditions: q.c.join(","),
+    timestamp: q.t
+  };
+}
+
 // fetch minute bars between start and end (fallback)
 async function fetchBars(symbol, startISO, endISO) {
   const url = `${BASE}/stocks/bars?symbols=${encodeURIComponent(symbol)}&timeframe=1Min&start=${encodeURIComponent(startISO)}&end=${encodeURIComponent(endISO)}&limit=1000`;
@@ -101,6 +133,25 @@ app.post('/api/fetch', async (req, res) => {
 
     // Fetch 1-minute bars (include the one before t1)
     const bars = await fetchBars(symbol, t1MinuteStartISO, t1MinuteEndISO);
+    let quotes = await fetchAllQuotes(symbol, startISO, endISO).catch(() => []);
+
+    // Extract Ask at T1
+    let askAtT1 = null;
+    if (quotes.length) {
+      const quoteAtOrAfterT1 = quotes.find(q => new Date(q.t) >= startDate);
+      if (quoteAtOrAfterT1) askAtT1 = quoteAtOrAfterT1.ap;
+    }
+
+    // Extract Bid at T2
+    let bidAtT2 = null;
+    if (quotes.length) {
+      for (let i = quotes.length - 1; i >= 0; i--) {
+        if (new Date(quotes[i].t) <= endDate) {
+          bidAtT2 = quotes[i].bp;
+          break;
+        }
+      }
+    }
 
     // Try to fetch trades first (tick-level). If that fails or returns empty, fallback to bars.
     let trades = [];
@@ -115,6 +166,8 @@ app.post('/api/fetch', async (req, res) => {
       symbol,
       t1: startISO,
       t2: endISO,
+      askAtT1: askAtT1,
+      bidAtT2: bidAtT2,
       source: trades.length ? 'trades' : 'bars',
       priceAtT1: null,
       priceAtT2: null,

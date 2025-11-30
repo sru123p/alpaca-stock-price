@@ -14,6 +14,8 @@ export interface StockAnalysis {
   percentDecreaseToMin: number;
   percentChangeT1toT2: number;
   volumeAtT1: number;
+  askAtT1: number;
+  bidAtT2: number;
   timestamp: string;
   firstEvent: string;
 }

@@ -35,6 +35,9 @@ export const ExportButtons = ({ stocks, onUpdateStocks }: ExportButtonsProps) =>
       '% Fall to Min': stock.percentDecreaseToMin.toFixed(2),
       '% T1 to T2': stock.percentChangeT1toT2.toFixed(2),
       'Volume at T1': stock.volumeAtT1,
+      'Occured First': stock.firstEvent,
+      'Ask at T1': stock.askAtT1,
+      'Bid at T2': stock.bidAtT2,
     }));
 
     const ws = XLSX.utils.json_to_sheet(data);
@@ -62,6 +65,9 @@ export const ExportButtons = ({ stocks, onUpdateStocks }: ExportButtonsProps) =>
       `${stock.percentDecreaseToMin.toFixed(2)}%`,
       `${stock.percentChangeT1toT2.toFixed(2)}%`,
       stock.volumeAtT1.toLocaleString(),
+      stock.firstEvent,
+      `$${stock.askAtT1.toFixed(4)}`,
+      `$${stock.bidAtT2.toFixed(4)}`,
     ]);
 
     autoTable(doc, {
@@ -77,7 +83,10 @@ export const ExportButtons = ({ stocks, onUpdateStocks }: ExportButtonsProps) =>
           '% Rise',
           '% Fall',
           '% T1 to T2',
-          'Volume',
+          'Volume at T1',
+          'Occured First',
+          'Ask at T1',
+          'Bid at T2',
         ],
       ],
       body: tableData,
@@ -102,6 +111,9 @@ export const ExportButtons = ({ stocks, onUpdateStocks }: ExportButtonsProps) =>
       '% Fall to Min',
       '% T1 to T2',
       'Volume at T1',
+      'Occured First',
+      'Ask at T1',
+      'Bid at T2',
     ];
 
     const rows = stocks.map((stock) => [
@@ -116,6 +128,9 @@ export const ExportButtons = ({ stocks, onUpdateStocks }: ExportButtonsProps) =>
       stock.percentDecreaseToMin.toFixed(2),
       stock.percentChangeT1toT2.toFixed(2),
       stock.volumeAtT1,
+      stock.firstEvent,
+      stock.askAtT1.toFixed(4),
+      stock.bidAtT2.toFixed(4),
     ]);
 
     const csvContent = [headers, ...rows].map((row) => row.join(',')).join('\n');
