@@ -60,6 +60,7 @@ export const useAlpacaData = () => {
         volumeAtT1: data.volumeAtT1 ?? null,
         askAtT1: data.askAtT1,
         bidAtT2: data.bidAtT2,
+        percentChangeAsktoBid: data.pctChangeAskToBid ?? null,
         timestamp: new Date().toISOString(),
         firstEvent: data.firstEvent,
       };

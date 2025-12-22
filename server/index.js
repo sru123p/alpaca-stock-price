@@ -153,6 +153,12 @@ app.post('/api/fetch', async (req, res) => {
       }
     }
 
+    if (askAtT1 != null && bidAtT2 != null) {
+      pctChangeAskToBid = ((bidAtT2 - askAtT1) / askAtT1) * 100;
+    } else {
+      pctChangeAskToBid = null;
+    }
+
     // Try to fetch trades first (tick-level). If that fails or returns empty, fallback to bars.
     let trades = [];
     try {
@@ -176,6 +182,7 @@ app.post('/api/fetch', async (req, res) => {
       pctIncreaseToMax: null,
       pctDecreaseToMin: null,
       pctChangeT1ToT2: null,
+      pctChangeAskToBid: pctChangeAskToBid,
       volumeAtT1: null,
       firstEvent: null,
     };

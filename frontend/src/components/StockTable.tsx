@@ -90,6 +90,15 @@ export const StockTable = ({ stocks, onDelete }: StockTableProps) => {
                     <TableCell>{stock.volumeAtT1.toLocaleString()}</TableCell>
                     <TableCell>{formatPrice(stock.askAtT1)}</TableCell>
                     <TableCell>{formatPrice(stock.bidAtT2)}</TableCell>
+                    <TableCell
+                      className={
+                        stock.percentChangeT1toT2 < 0
+                          ? "text-red-600 dark:text-red-400"
+                          : "text-green-600 dark:text-green-400"
+                      }
+                    >
+                      {formatPercent(stock.percentChangeAsktoBid)}
+                    </TableCell>
                     <TableCell className="text-center">
                       <button
                       onClick={() => onDelete(stock.id)}
