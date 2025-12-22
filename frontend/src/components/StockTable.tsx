@@ -45,6 +45,7 @@ export const StockTable = ({ stocks, onDelete }: StockTableProps) => {
                 <TableHead>Volume at T1</TableHead>
                 <TableHead>Ask at T1</TableHead>
                 <TableHead>Bid at T2</TableHead>
+                <TableHead>% Ask to Bid</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
